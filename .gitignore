@@ -20,3 +20,5 @@ spatial-studio/Oracle_Spatial_Studio/
 
 # Local Java libraries
 libs/*.jar
+
+spatial_studio_config_backup.json
