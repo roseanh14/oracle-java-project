@@ -1,0 +1,23 @@
+services:
+  oracle:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: oracle-free
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PWD: ${ORACLE_PWD}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+
+  spatial-studio:
+    build:
+      context: ./spatial-studio
+    container_name: oracle-spatial-studio
+    ports:
+      - "4040:4040"
+    depends_on:
+      - oracle
+    restart: unless-stopped
+
+volumes:
+  oracle-data:

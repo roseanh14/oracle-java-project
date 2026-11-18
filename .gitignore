@@ -1,0 +1,22 @@
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Maven
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Oracle Spatial Studio
+spatial-studio/*.zip
+spatial-studio/Oracle_Spatial_Studio/
+
+# Local Java libraries
+libs/*.jar

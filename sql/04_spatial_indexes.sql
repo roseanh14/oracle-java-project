@@ -1,0 +1,40 @@
+
+-- Metadata pro uzly
+INSERT INTO USER_SDO_GEOM_METADATA (
+    TABLE_NAME, COLUMN_NAME, DIMINFO, SRID
+)
+VALUES (
+           'CITY_NETWORK_NODE$',
+           'GEOMETRY',
+           SDO_DIM_ARRAY(
+                   SDO_DIM_ELEMENT('LONGITUDE', 14, 15, 0.000005),
+                   SDO_DIM_ELEMENT('LATITUDE', 50, 51, 0.000005)
+           ),
+           4326
+       );
+
+-- Metadata pro hrany
+INSERT INTO USER_SDO_GEOM_METADATA (
+    TABLE_NAME, COLUMN_NAME, DIMINFO, SRID
+)
+VALUES (
+           'CITY_NETWORK_LINK$',
+           'GEOMETRY',
+           SDO_DIM_ARRAY(
+                   SDO_DIM_ELEMENT('LONGITUDE', 14, 15, 0.000005),
+                   SDO_DIM_ELEMENT('LATITUDE', 50, 51, 0.000005)
+           ),
+           4326
+       );
+
+COMMIT;
+
+-- Prostorovy index uzlu
+CREATE INDEX CITY_NODE_SPATIAL_IDX
+    ON CITY_NETWORK_NODE$(GEOMETRY)
+    INDEXTYPE IS MDSYS.SPATIAL_INDEX_V2;
+
+-- Prostorovy index hran
+CREATE INDEX CITY_LINK_SPATIAL_IDX
+    ON CITY_NETWORK_LINK$(GEOMETRY)
+    INDEXTYPE IS MDSYS.SPATIAL_INDEX_V2;

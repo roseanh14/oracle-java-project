@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.7</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>cz.oracle</groupId>
+    <artifactId>oracle-java-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot REST API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Database connection -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!-- Oracle JDBC driver -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>23.26.4.0.0</version>
+        </dependency>
+
+        <!-- Oracle Spatial NDM -->
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdonm</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdonm.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdondme</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdondme.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdondmnfe</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdondmnfe.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdoapi</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdoapi.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdotype</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdotype.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdodep3prt</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdodep3prt.jar</systemPath>
+        </dependency>
+
+        <!-- Oracle Spatial utilities -->
+        <dependency>
+            <groupId>com.oracle.spatial</groupId>
+            <artifactId>sdoutl</artifactId>
+            <version>26ai</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/sdoutl.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

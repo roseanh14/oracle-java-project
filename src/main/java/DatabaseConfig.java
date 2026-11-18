@@ -1,0 +1,26 @@
+
+import javax.sql.DataSource;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+@Configuration
+public class DatabaseConfig {
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    public VertexService vertexService(JdbcTemplate jdbc) {
+        return new VertexService(jdbc);
+    }
+
+    @Bean
+    public PathService pathService(DataSource dataSource,
+                                   JdbcTemplate jdbc) {
+        return new PathService(dataSource, jdbc);
+    }
+}
