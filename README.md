@@ -1,69 +1,77 @@
 # Oracle Spatial Network
 
-## 1. Project Description
+Semester project implementing a spatial network using **Oracle Spatial Network Data Model (NDM)** and a Java REST API.
 
-This project implements a spatial transport network using Oracle Database 26ai, Oracle Spatial Network Data Model (NDM), and Java Spring Boot.
+The project demonstrates spatial data storage, nearest-node search, weighted shortest-path calculation, and network visualization.
 
-The network represents a simplified transport system with stops and connections located in Prague, Czech Republic.
-
-The main goal is to create and validate a spatial network, visualize it on a map, and provide REST API endpoints for finding the nearest node and the shortest path between two nodes.
-
-## 2. Technologies
+## 1. Technologies
 
 - Java 21
 - Spring Boot 3.5.7
 - Maven
 - Oracle Database 26ai Free
-- Oracle Spatial Network Data Model (NDM)
+- Oracle Spatial NDM
 - Oracle Spatial Studio 26.1
-- Oracle JDBC Driver
+- Oracle JDBC
 - Docker and Docker Compose
-- IntelliJ IDEA
 
-## 3. Network Model
+## 2. Network Model
 
-The network contains:
+The project uses real street data from **OpenStreetMap**, exported using Overpass Turbo.
+
+A selected area of Prague was processed into a simplified, undirected road network.
 
 | Property | Value |
 |---|---|
-| Network name | CITY_NETWORK |
-| Number of nodes | 30 |
-| Number of links | 60 |
+| Network name | `CITY_NETWORK` |
+| Nodes | 45 |
+| Links | 60 |
 | Coordinate system | WGS 84 (SRID 4326) |
-| Node geometry | SDO_GEOMETRY (points) |
-| Link geometry | SDO_GEOMETRY (lines) |
-| Link weights | Distance in meters |
+| Node geometry | `SDO_GEOMETRY` (points) |
+| Link geometry | `SDO_GEOMETRY` (lines) |
+| Link weights | Approximate road length in meters |
 | Network type | Undirected |
 
-The nodes represent transport stops, and the links represent connections between them.
+Nodes represent street junctions or connection points. Links represent street segments.
 
-Each link contains a COST attribute representing its weight in meters.
+Each link contains a non-negative `COST` value used for shortest-path calculations.
 
-The network was created using Oracle's `SDO_NET.CREATE_SDO_NETWORK` procedure.
+The simplified model does not account for one-way restrictions or traffic conditions.
 
-## 4. Project Structure
+### Data Source
+
+- Provider: OpenStreetMap contributors
+- Website: https://www.openstreetmap.org/
+- Export tool: https://overpass-turbo.eu/
+- License: Open Database License (ODbL 1.0)
+
+The original data was filtered and processed for educational purposes.
+
+## 3. Project Structure
 
 ```text
 oracle-java-project/
-├── src/
-│   └── main/
-│       ├── java/
-│       │   ├── Application.java
-│       │   ├── DatabaseConfig.java
-│       │   ├── VertexController.java
-│       │   ├── VertexService.java
-│       │   ├── VertexResponse.java
-│       │   ├── PathController.java
-│       │   ├── PathService.java
-│       │   └── PathResponse.java
-│       └── resources/
-│           └── application.properties
+├── src/main/
+│   ├── java/
+│   │   ├── Application.java
+│   │   ├── DatabaseConfig.java
+│   │   ├── VertexController.java
+│   │   ├── VertexService.java
+│   │   ├── VertexResponse.java
+│   │   ├── PathController.java
+│   │   ├── PathService.java
+│   │   └── PathResponse.java
+│   └── resources/
+│       └── application.properties
 ├── sql/
 │   ├── 01_create_network.sql
 │   ├── 02_insert_nodes.sql
 │   ├── 03_insert_links.sql
 │   ├── 04_spatial_indexes.sql
-│   └── 05_validate_network.sql
+│   ├── 05_validate_network.sql
+│   ├── osm_02_insert_real_nodes.sql
+│   ├── osm_03_insert_real_links.sql
+│   └── osm_06_replace_synthetic_data.sql
 ├── libs/
 ├── spatial-studio/
 │   └── Dockerfile
@@ -72,107 +80,114 @@ oracle-java-project/
 └── README.md
 ```
 
-The Java classes are kept simple and separated according to their responsibilities.
+## 4. Installation and Setup
 
-## 5. Database Setup
+### Requirements
 
-The Oracle database runs in Docker.
+- Java 21
+- Maven
+- Docker Desktop
+- Oracle Spatial NDM Java libraries
 
-Start the containers using:
+### Start Oracle Database and Spatial Studio
+
+Run from the project directory:
 
 ```powershell
 docker compose up -d --build
 ```
 
-The Oracle database is available on port `1521`.
+Services:
 
-The application uses the database service `FREEPDB1` and the database user `spatial_user`.
+| Service | Address |
+|---|---|
+| Oracle Database | `localhost:1521` |
+| Oracle Spatial Studio | `https://localhost:4040/spatialstudio` |
 
-The SQL scripts in the `sql` directory are organized as follows:
+The database connection uses:
 
-1. `01_create_network.sql` – Creates the Oracle NDM network.
-2. `02_insert_nodes.sql` – Inserts 30 nodes.
-3. `03_insert_links.sql` – Inserts 60 weighted links.
-4. `04_spatial_indexes.sql` – Creates spatial metadata and indexes.
-5. `05_validate_network.sql` – Validates the network.
+- Database service: `FREEPDB1`
+- Database user: `spatial_user`
 
-The scripts are intended for initial database setup and should not be executed repeatedly against an already populated network.
+Database credentials are configured locally and are not stored in the repository.
 
-## 6. Running the Java Application
+### Initialize the Network
 
-The project uses Java 21 and Maven.
+The `sql` directory contains scripts for creating and populating the Oracle NDM network.
 
-Set the `DB_PASSWORD` environment variable to the password of the Oracle database user.
+The original scripts create a demonstration network:
 
-In PowerShell:
+1. `01_create_network.sql` – creates the network.
+2. `02_insert_nodes.sql` – inserts demonstration nodes.
+3. `03_insert_links.sql` – inserts demonstration links.
+4. `04_spatial_indexes.sql` – configures spatial metadata and indexes.
+5. `05_validate_network.sql` – validates the network.
+
+The OpenStreetMap scripts provide the replacement dataset:
+
+- `osm_02_insert_real_nodes.sql` – 45 geographic nodes.
+- `osm_03_insert_real_links.sql` – 60 weighted links.
+- `osm_06_replace_synthetic_data.sql` – replaces the demonstration data.
+
+**Note:** The replacement scripts must be tested against the database schema before they can be considered a verified installation procedure. Back up the existing network before running them.
+
+### Run the Java Application
+
+Set the database password in PowerShell:
 
 ```powershell
 $env:DB_PASSWORD = Read-Host "Database password"
 ```
 
-Run the Spring Boot application using Maven:
+Start Spring Boot:
 
 ```powershell
 mvn spring-boot:run "-Dspring-boot.run.main-class=Application"
 ```
 
-If Maven is not installed globally, use the Maven executable bundled with IntelliJ IDEA.
+The application starts at:
 
-After successful startup, the REST API is available at:
+http://localhost:8080
 
-`http://localhost:8080`
+Oracle Spatial NDM JAR dependencies must be available locally in the `libs` directory. They are not included in the Git repository.
 
-## 7. REST API
+## 5. REST API
 
-### 7.1 Find the Nearest Node
+The application provides two GET endpoints.
 
-**Endpoint:**
+### Find the Nearest Node
 
 ```http
 GET /api/vertices/nearest?lat=50.0878&lon=14.421
 ```
 
-This endpoint finds the nearest network node using Oracle Spatial's `SDO_NN` functionality.
+Uses Oracle Spatial `SDO_NN` and `SDO_NN_DISTANCE` to find the nearest network node.
 
-Example response:
+The response contains:
 
-```json
-{
-  "id": 30,
-  "name": "Zastavka 30",
-  "distanceMeters": 787.528712788782
-}
-```
+- `id` – node identifier
+- `name` – node name
+- `distanceMeters` – distance in meters
 
-The distance is returned in meters.
-
-### 7.2 Find the Shortest Path
-
-**Endpoint:**
+### Find the Shortest Path
 
 ```http
 GET /api/path?from=1&to=20
 ```
 
-This endpoint finds the shortest path using Oracle NDM Java API and Dijkstra's algorithm.
+Uses Oracle NDM Java API and Dijkstra's algorithm.
 
-Example response:
+The response contains:
 
-```json
-{
-  "nodes": [1, 7, 13, 20],
-  "links": [26, 32, 60],
-  "totalWeight": 709.455583948486
-}
-```
+- `nodes` – ordered node identifiers
+- `links` – ordered link identifiers
+- `totalWeight` – sum of link costs
 
-The response contains the ordered node IDs, link IDs, and the total path weight.
+The shortest-path algorithm is provided by Oracle NDM, not implemented manually.
 
-The shortest path is calculated using Oracle NDM rather than a custom algorithm.
+## 6. Network Validation and Testing
 
-## 8. Network Validation
-
-The network was validated using:
+Network validation is performed using:
 
 ```sql
 SELECT SDO_NET.VALIDATE_NETWORK(
@@ -181,78 +196,54 @@ SELECT SDO_NET.VALIDATE_NETWORK(
 FROM DUAL;
 ```
 
-**Result:**
+The original demonstration network was successfully validated with the result `TRUE`.
 
-```text
-RESULT
-------
-TRUE
-```
+The REST API was also tested with invalid input parameters:
 
-The network contains the required nodes and links, and the spatial indexes were successfully created.
-
-## 9. Weighted Shortest Path Experiment
-
-An experiment was performed to verify that the shortest path calculation uses link weights.
-
-The original shortest path between nodes 1 and 20 was:
-
-```text
-1 -> 7 -> 13 -> 20
-Total weight: 709.46 m
-```
-
-The cost of the link between nodes 1 and 2 was temporarily changed from approximately 143.15 to 1.
-
-After restarting the application, Oracle NDM returned a different path:
-
-```text
-1 -> 2 -> 8 -> 14 -> 20
-Total weight: 668.38 m
-```
-
-The network geometry was not modified.
-
-This demonstrates that changing link weights can change the selected shortest path.
-
-After the experiment, the original link cost was restored.
-
-## 10. Input Validation
-
-The REST API validates input parameters.
-
-| Test case | HTTP status |
+| Test | Expected and observed status |
 |---|---|
-| Invalid node ID (from=0) | 400 Bad Request |
-| Non-existing node (from=999) | 404 Not Found |
-| Invalid latitude (lat=999) | 400 Bad Request |
+| `from=0` | 400 Bad Request |
+| `from=999` | 404 Not Found |
+| `lat=999` | 400 Bad Request |
 
-These cases were tested successfully.
+### Weighted Shortest-Path Experiment
 
-## 11. Oracle Spatial Studio
+A test was performed using the original demonstration network.
 
-Oracle Spatial Studio is used to visualize the network.
+| | Original costs | Modified cost |
+|---|---|---|
+| Path | 1 → 7 → 13 → 20 | 1 → 2 → 8 → 14 → 20 |
+| Total weight | 709.46 m | 668.38 m |
 
-The application runs in a separate Docker container and is accessible at:
+The cost of one link was temporarily changed from approximately 143.15 to 1, without changing its geometry.
 
-`https://localhost:4040/spatialstudio`
+Oracle NDM then selected a different shortest path.
 
-Two datasets were created:
+This confirms that shortest-path selection depends on link weights.
 
-- **City Nodes** – visualizes 30 transport stops.
-- **City Links** – visualizes 60 network connections.
+The original cost was restored after testing.
 
-Both datasets are included in the project **City Transport Network**.
+**Note:** These results refer to the original demonstration network. The imported OpenStreetMap network requires its own validation and API tests.
 
-The visualization displays the network nodes and links on a map of Prague.
+## 7. Network Visualization
 
-## 12. Conclusion
+Oracle Spatial Studio is used to visualize network nodes and links on a map.
 
-The project successfully implements a spatial network using Oracle Database and Oracle Spatial NDM.
+The project contains two datasets:
 
-The network contains 30 nodes and 60 links, supports spatial queries, and provides REST API endpoints for nearest-node search and weighted shortest-path calculation.
+- **City Nodes** – network vertices
+- **City Links** – network edges
 
-The network was validated successfully, and the results were visualized using Oracle Spatial Studio.
+The visualization project is named **City Transport Network**.
 
-The weighted shortest-path experiment confirmed that the Oracle NDM algorithm considers link costs when selecting a path.
+The original demonstration network has been visualized successfully. The OpenStreetMap network will be visualized after its database import is verified.
 
+## 8. Conclusion
+
+The project implements an Oracle Spatial NDM network integrated with a Java Spring Boot REST API.
+
+The application supports nearest-node queries, weighted shortest-path calculations, input validation, and spatial visualization.
+
+The initial demonstration network was successfully tested, including an experiment confirming that Oracle NDM uses link weights when calculating shortest paths.
+
+A replacement network based on real OpenStreetMap road data has also been prepared. Its final database import and validation remain to be verified.
