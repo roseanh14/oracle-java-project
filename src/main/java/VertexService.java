@@ -2,6 +2,7 @@
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.List;
 
 public class VertexService {
 
@@ -11,7 +12,7 @@ public class VertexService {
         this.jdbc = jdbc;
     }
 
-    public VertexResponse findNearest(double lat, double lon) {
+    public List<VertexResponse> findNearest(double lat, double lon) {
         if (!Double.isFinite(lat) || !Double.isFinite(lon)
                 || lat < -90 || lat > 90
                 || lon < -180 || lon > 180) {
@@ -31,24 +32,28 @@ public class VertexService {
                     SDO_POINT_TYPE(?, ?, NULL),
                     NULL, NULL
                 ),
-                'sdo_num_res=1 unit=M', 1
+                'sdo_num_res=3 unit=M', 1
             ) = 'TRUE'
             ORDER BY DISTANCE_M
-            FETCH FIRST 1 ROW ONLY
+            FETCH FIRST 3 ROWS ONLY
             """;
 
-        return jdbc.query(sql, rs -> {
-            if (!rs.next()) {
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Zadna zastavka"
-                );
-            }
+        List<VertexResponse> result = jdbc.query(
+                sql,
+                (rs, rowNum) -> new VertexResponse(
+                        rs.getLong("NODE_ID"),
+                        rs.getString("NODE_NAME"),
+                        rs.getDouble("DISTANCE_M")
+                ),
+                lon, lat
+        );
 
-            return new VertexResponse(
-                    rs.getLong("NODE_ID"),
-                    rs.getString("NODE_NAME"),
-                    rs.getDouble("DISTANCE_M")
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Zadne uzly"
             );
-        }, lon, lat);
+        }
+
+        return result;
     }
 }
